@@ -1,11 +1,11 @@
 ﻿using StargateAPI.Business.Data;
 using StargateAPI.Business.Dtos;
+using StargateAPI.Business.Services.Interfaces;
 using StargateAPI.Enums;
-using StargateAPI.Services.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace StargateAPI.Services
+namespace StargateAPI.Business.Services
 {
     public class DatabaseLoggingService : IDatabaseLoggingService
     {

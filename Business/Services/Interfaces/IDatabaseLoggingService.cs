@@ -1,7 +1,7 @@
 ﻿using StargateAPI.Business.Dtos;
 using StargateAPI.Enums;
 
-namespace StargateAPI.Services.Interfaces
+namespace StargateAPI.Business.Services.Interfaces
 {
     public interface IDatabaseLoggingService
     {
