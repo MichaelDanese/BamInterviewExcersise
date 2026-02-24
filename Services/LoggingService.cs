@@ -9,11 +9,11 @@ namespace StargateAPI.Services
 {
     public class LoggingService : ILoggingService
     {
-        private readonly StargateContext _stargateContext;
+        private readonly StarbaseContext _starbaseContext;
 
-        public LoggingService(StargateContext context)
+        public LoggingService(StarbaseContext context)
         {
-            _stargateContext = context;
+            _starbaseContext = context;
         }
 
         public async Task LogAsync(StargateLogSeverityEnum severity, string message, string details, Exception? exception)
@@ -36,7 +36,7 @@ namespace StargateAPI.Services
 
         public async Task LogErrorAsync(string message, string details, Exception? exception)
         {
-            await _stargateContext.StargateLogs.AddAsync(new StargateLog
+            await _starbaseContext.StargateLogs.AddAsync(new StargateLog
             {
                 Message = message,
                 Details = details,
@@ -48,7 +48,7 @@ namespace StargateAPI.Services
 
         public async Task LogInfoAsync(string message, string details)
         {
-            await _stargateContext.StargateLogs.AddAsync(new StargateLog
+            await _starbaseContext.StargateLogs.AddAsync(new StargateLog
             {
                 Message = message,
                 Details = details,
@@ -59,7 +59,7 @@ namespace StargateAPI.Services
 
         public async Task LogWarningAsync(string message, string details)
         {
-            await _stargateContext.StargateLogs.AddAsync(new StargateLog
+            await _starbaseContext.StargateLogs.AddAsync(new StargateLog
             {
                 Message = message,
                 Details = details,

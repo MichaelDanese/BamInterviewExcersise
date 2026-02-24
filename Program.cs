@@ -20,7 +20,7 @@ builder.Services.AddSwaggerGen( sg =>
     });
 });
 
-builder.Services.AddDbContext<StargateContext>(options => 
+builder.Services.AddDbContext<StarbaseContext>(options => 
     options.UseSqlite(builder.Configuration.GetConnectionString("StarbaseApiDatabase")));
 
 builder.Services.AddScoped<ILoggingService, LoggingService>();
@@ -52,7 +52,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<StargateContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<StarbaseContext>();
     dbContext.Database.Migrate();
 }
 
