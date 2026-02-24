@@ -1,12 +1,13 @@
-﻿using StargateAPI.Enums;
+﻿using StargateAPI.Business.Dtos;
+using StargateAPI.Enums;
 
 namespace StargateAPI.Services.Interfaces
 {
     public interface ILoggingService
     {
-        Task LogAsync(StargateLogSeverityEnum severity, string message, string details, Exception? exception);
-        Task LogInfoAsync(string message, string details);
-        Task LogWarningAsync(string message, string details);
-        Task LogErrorAsync(string message, string details,  Exception? exception);
+        public Task LogAsync(StargateLogSeverityEnum severity, string message, string details, Exception? exception);
+        public Task LogInfoAsync(string message, string details);
+        public Task LogWarningAsync(string message, string details);
+        public Task LogErrorAsync(string message, string details,  Exception? exception);
     }
 }
