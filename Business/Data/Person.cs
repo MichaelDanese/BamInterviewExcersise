@@ -23,6 +23,12 @@ namespace StargateAPI.Business.Data
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            // a person is uniquely identified by their name, so we can use that as a unique index
+            // this would normally not done in a real application as names are not unique, but for the sake of this example we will assume that they are
+            builder.HasIndex(x => x.Name).IsUnique();
+            builder.Property(x => x.Name).IsRequired();
+
             builder.HasOne(z => z.AstronautDetail).WithOne(z => z.Person).HasForeignKey<AstronautDetail>(z => z.PersonId);
             builder.HasMany(z => z.AstronautDuties).WithOne(z => z.Person).HasForeignKey(z => z.PersonId);
         }
