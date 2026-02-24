@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 
 namespace StargateAPI.Services
 {
-    public class LoggingService : ILoggingService
+    public class DatabaseLoggingService : IDatabaseLoggingService
     {
         private readonly StarbaseContext _starbaseContext;
 
-        public LoggingService(StarbaseContext context)
+        public DatabaseLoggingService(StarbaseContext context)
         {
             _starbaseContext = context;
         }

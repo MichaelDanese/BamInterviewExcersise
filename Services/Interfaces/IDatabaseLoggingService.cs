@@ -3,7 +3,7 @@ using StargateAPI.Enums;
 
 namespace StargateAPI.Services.Interfaces
 {
-    public interface ILoggingService
+    public interface IDatabaseLoggingService
     {
         public Task LogAsync(StargateLogSeverityEnum severity, string message, string details, Exception? exception);
         public Task LogInfoAsync(string message, string details);

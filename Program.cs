@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen( sg =>
 builder.Services.AddDbContext<StarbaseContext>(options => 
     options.UseSqlite(builder.Configuration.GetConnectionString("StarbaseApiDatabase")));
 
-builder.Services.AddScoped<ILoggingService, LoggingService>();
+builder.Services.AddScoped<IDatabaseLoggingService, DatabaseLoggingService>();
 
 builder.Services.AddMediatR(cfg =>
 {
