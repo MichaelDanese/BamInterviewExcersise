@@ -13,8 +13,8 @@ namespace StargateAPI.Business.Queries
 
     public class GetPersonByNameHandler : IRequestHandler<GetPersonByName, GetPersonByNameResult>
     {
-        private readonly StargateContext _context;
-        public GetPersonByNameHandler(StargateContext context)
+        private readonly StarbaseContext _context;
+        public GetPersonByNameHandler(StarbaseContext context)
         {
             _context = context;
         }

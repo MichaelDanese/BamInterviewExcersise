@@ -13,8 +13,8 @@ namespace StargateAPI.Business.Commands
 
     public class CreatePersonPreProcessor : IRequestPreProcessor<CreatePerson>
     {
-        private readonly StargateContext _context;
-        public CreatePersonPreProcessor(StargateContext context)
+        private readonly StarbaseContext _context;
+        public CreatePersonPreProcessor(StarbaseContext context)
         {
             _context = context;
         }
@@ -30,9 +30,9 @@ namespace StargateAPI.Business.Commands
 
     public class CreatePersonHandler : IRequestHandler<CreatePerson, CreatePersonResult>
     {
-        private readonly StargateContext _context;
+        private readonly StarbaseContext _context;
 
-        public CreatePersonHandler(StargateContext context)
+        public CreatePersonHandler(StarbaseContext context)
         {
             _context = context;
         }

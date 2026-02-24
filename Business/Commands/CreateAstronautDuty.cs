@@ -21,9 +21,9 @@ namespace StargateAPI.Business.Commands
 
     public class CreateAstronautDutyPreProcessor : IRequestPreProcessor<CreateAstronautDuty>
     {
-        private readonly StargateContext _context;
+        private readonly StarbaseContext _context;
 
-        public CreateAstronautDutyPreProcessor(StargateContext context)
+        public CreateAstronautDutyPreProcessor(StarbaseContext context)
         {
             _context = context;
         }
@@ -44,9 +44,9 @@ namespace StargateAPI.Business.Commands
 
     public class CreateAstronautDutyHandler : IRequestHandler<CreateAstronautDuty, CreateAstronautDutyResult>
     {
-        private readonly StargateContext _context;
+        private readonly StarbaseContext _context;
 
-        public CreateAstronautDutyHandler(StargateContext context)
+        public CreateAstronautDutyHandler(StarbaseContext context)
         {
             _context = context;
         }

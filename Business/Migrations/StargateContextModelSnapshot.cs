@@ -9,7 +9,7 @@ using StargateAPI.Business.Data;
 
 namespace StargateAPI.Migrations
 {
-    [DbContext(typeof(StargateContext))]
+    [DbContext(typeof(StarbaseContext))]
     partial class StargateContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
