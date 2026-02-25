@@ -44,6 +44,8 @@ namespace StargateAPI.Business.Services
                 StargateLogSeverityId = (int)StargateLogSeverityEnum.Error,
                 CreatedOn = GetLogTime()
             });
+
+            await _starbaseContext.SaveChangesAsync();
         }
 
         public async Task LogInfoAsync(string message, string details)
@@ -55,6 +57,8 @@ namespace StargateAPI.Business.Services
                 StargateLogSeverityId = (int)StargateLogSeverityEnum.Info,
                 CreatedOn = GetLogTime()
             });
+
+            await _starbaseContext.SaveChangesAsync();
         }
 
         public async Task LogWarningAsync(string message, string details)
@@ -66,6 +70,8 @@ namespace StargateAPI.Business.Services
                 StargateLogSeverityId = (int)StargateLogSeverityEnum.Warning,
                 CreatedOn = GetLogTime()
             });
+
+            await _starbaseContext.SaveChangesAsync();
         }
 
         private DateTime GetLogTime()
