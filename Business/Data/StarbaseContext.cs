@@ -3,21 +3,23 @@ using System.Data;
 
 namespace StargateAPI.Business.Data
 {
-    public class StargateContext : DbContext
+    public class StarbaseContext : DbContext
     {
         public IDbConnection Connection => Database.GetDbConnection();
         public DbSet<Person> People { get; set; }
         public DbSet<AstronautDetail> AstronautDetails { get; set; }
         public DbSet<AstronautDuty> AstronautDuties { get; set; }
+        public DbSet<StargateLog> StargateLogs { get; set; }
+        public DbSet<StargateLogSeverity> StargateLogSeverities { get; set; }
 
-        public StargateContext(DbContextOptions<StargateContext> options)
+        public StarbaseContext(DbContextOptions<StarbaseContext> options)
         : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(StargateContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(StarbaseContext).Assembly);
 
             //SeedData(modelBuilder);
 

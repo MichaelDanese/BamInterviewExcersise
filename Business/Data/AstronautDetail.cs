@@ -28,6 +28,9 @@ namespace StargateAPI.Business.Data
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Property(x => x.CurrentRank).IsRequired();
+            builder.Property(x => x.CurrentDutyTitle).IsRequired();
+            builder.Property(x => x.CareerStartDate).IsRequired();
         }
     }
 }

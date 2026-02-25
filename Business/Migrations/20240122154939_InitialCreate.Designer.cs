@@ -10,7 +10,7 @@ using StargateAPI.Business.Data;
 
 namespace StargateAPI.Migrations
 {
-    [DbContext(typeof(StargateContext))]
+    [DbContext(typeof(StarbaseContext))]
     [Migration("20240122154939_InitialCreate")]
     partial class InitialCreate
     {

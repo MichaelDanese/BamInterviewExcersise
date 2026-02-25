@@ -13,9 +13,9 @@ namespace StargateAPI.Business.Queries
 
     public class GetAstronautDutiesByNameHandler : IRequestHandler<GetAstronautDutiesByName, GetAstronautDutiesByNameResult>
     {
-        private readonly StargateContext _context;
+        private readonly StarbaseContext _context;
 
-        public GetAstronautDutiesByNameHandler(StargateContext context)
+        public GetAstronautDutiesByNameHandler(StarbaseContext context)
         {
             _context = context;
         }
