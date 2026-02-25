@@ -29,6 +29,9 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.AddRequestPreProcessor<CreateAstronautDutyPreProcessor>();
     cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
+
+    cfg.RegisterServicesFromAssembly(typeof(CreatePerson).Assembly);
+    cfg.AddRequestPreProcessor<CreatePersonPreProcessor>();
 });
 
 var allowedOrigins = builder.Configuration

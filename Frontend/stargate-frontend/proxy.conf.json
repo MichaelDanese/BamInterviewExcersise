@@ -1,0 +1,4 @@
+{
+  "/Person": { "target": "https://localhost:7204", "secure": false, "changeOrigin": true },
+  "/AstronautDuty": { "target": "https://localhost:7204", "secure": false, "changeOrigin": true }
+}

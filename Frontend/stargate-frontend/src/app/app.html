@@ -1,0 +1,101 @@
+<ngx-spinner
+  name="rocketSpinner"
+  [fullScreen]="true"
+  bdColor="rgba(0, 0, 0, 0.45)"
+  type="none"
+>
+  <div class="rocket-spinner-content" aria-label="Loading">
+    <svg
+      class="rocket-svg"
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      role="img"
+      aria-hidden="true"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"/>
+      <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"/>
+      <path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+    </svg>
+    <p>Launching Stargate...</p>
+  </div>
+</ngx-spinner>
+
+<div class="message-modal-backdrop" *ngIf="successMessage() || errorMessage()">
+  <div class="message-modal" role="dialog" aria-modal="true" aria-label="Status message">
+    <h3 [class.success]="!!successMessage()" [class.error]="!!errorMessage()">
+      {{ successMessage() ? 'Success' : 'Error' }}
+    </h3>
+    <p>{{ successMessage() || errorMessage() }}</p>
+    <button type="button" (click)="clearMessages()">Close</button>
+  </div>
+</div>
+
+<div class="container">
+  <h1>Stargate Astronaut Management</h1>
+
+  <section>
+    <h2>Create Person</h2>
+    <form [formGroup]="createPersonForm" (ngSubmit)="onCreatePerson()">
+      <input type="text" formControlName="personName" placeholder="Person name" />
+      <button type="submit" [disabled]="isLoading()">Create Person</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Create Astronaut Duty</h2>
+    <form [formGroup]="createDutyForm" (ngSubmit)="onCreateDuty()">
+      <input type="text" formControlName="name" placeholder="Person name" />
+      <input type="text" formControlName="rank" placeholder="Rank" />
+      <input type="text" formControlName="dutyTitle" placeholder="Duty title" />
+      <input type="date" formControlName="dutyStartDate" />
+      <button type="submit" [disabled]="isLoading()">Create Duty</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Search Person Duties</h2>
+    <form [formGroup]="searchForm" (ngSubmit)="onSearchByName()">
+      <input type="text" formControlName="searchName" placeholder="Search by name" />
+      <button type="submit" [disabled]="isLoading()">Search</button>
+    </form>
+  </section>
+
+  <section *ngIf="selectedPerson() as selectedPerson">
+    <h2>Person Details</h2>
+    <p><strong>Name:</strong> {{ selectedPerson.name }}</p>
+    <p><strong>Current Rank:</strong> {{ selectedPerson.currentRank || '-' }}</p>
+    <p><strong>Current Duty:</strong> {{ selectedPerson.currentDutyTitle || '-' }}</p>
+    <p><strong>Career Start:</strong> {{ selectedPerson.careerStartDate ? (selectedPerson.careerStartDate | date:'MM-dd-yyyy') : '-' }}</p>
+    <p><strong>Career End:</strong> {{ selectedPerson.careerEndDate ? (selectedPerson.careerEndDate | date:'MM-dd-yyyy') : '-' }}</p>
+  </section>
+
+  <section *ngIf="selectedDuties().length > 0">
+    <h2>Duty History</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Duty Title</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let duty of selectedDuties()">
+          <td>{{ duty.rank }}</td>
+          <td>{{ duty.dutyTitle }}</td>
+          <td>{{ duty.dutyStartDate | date:'MM-dd-yyyy' }}</td>
+          <td>{{ duty.dutyEndDate ? (duty.dutyEndDate | date:'MM-dd-yyyy') : '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
