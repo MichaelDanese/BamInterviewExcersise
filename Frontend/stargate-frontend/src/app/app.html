@@ -28,6 +28,16 @@
   </div>
 </ngx-spinner>
 
+<div class="message-modal-backdrop" *ngIf="successMessage() || errorMessage()">
+  <div class="message-modal" role="dialog" aria-modal="true" aria-label="Status message">
+    <h3 [class.success]="!!successMessage()" [class.error]="!!errorMessage()">
+      {{ successMessage() ? 'Success' : 'Error' }}
+    </h3>
+    <p>{{ successMessage() || errorMessage() }}</p>
+    <button type="button" (click)="clearMessages()">Close</button>
+  </div>
+</div>
+
 <div class="container">
   <h1>Stargate Astronaut Management</h1>
 
@@ -57,9 +67,6 @@
       <button type="submit" [disabled]="isLoading()">Search</button>
     </form>
   </section>
-
-  <p class="success" *ngIf="successMessage()">{{ successMessage() }}</p>
-  <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
   <section *ngIf="selectedPerson() as selectedPerson">
     <h2>Person Details</h2>
