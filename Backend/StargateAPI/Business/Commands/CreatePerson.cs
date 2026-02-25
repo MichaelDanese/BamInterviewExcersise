@@ -28,7 +28,7 @@ namespace StargateAPI.Business.Commands
 
             var normalizedName = request.Name.ToLower().NormalizeNameOrTitle();
             var personExists = await _context.People.AsNoTracking()
-                .AnyAsync(z => z.Name.ToLower().NormalizeNameOrTitle() == normalizedName, 
+                .AnyAsync(z => z.Name.ToLower() == normalizedName, 
                 cancellationToken);
 
             if (personExists)
