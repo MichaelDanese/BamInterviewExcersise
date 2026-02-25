@@ -1,9 +1,7 @@
 using Moq;
 using StargateAPI.Business.Data;
 using StargateAPI.Business.Queries;
-using StargateAPI.Business.Services.Interfaces;
 using StargateAPI.Tests.TestHelpers;
-using System.Threading.Tasks;
 
 namespace StargateAPI.Tests.QueryTests
 {
@@ -20,8 +18,7 @@ namespace StargateAPI.Tests.QueryTests
             var request = new GetPersonByName { Name = "John Doe" };
             var cancellationToken = CancellationToken.None;
 
-            var mockLogger = new Mock<IDatabaseLoggingService>();
-            var handler = new GetPersonByNameHandler(context, mockLogger.Object);
+            var handler = new GetPersonByNameHandler(context);
 
             var result = await handler.Handle(request, cancellationToken);
 
@@ -41,8 +38,7 @@ namespace StargateAPI.Tests.QueryTests
             var request = new GetPersonByName { Name = "Jane Doe" };
             var cancellationToken = CancellationToken.None;
 
-            var mockLogger = new Mock<IDatabaseLoggingService>();
-            var handler = new GetPersonByNameHandler(context, mockLogger.Object);
+            var handler = new GetPersonByNameHandler(context);
 
             var result = await handler.Handle(request, cancellationToken);
 

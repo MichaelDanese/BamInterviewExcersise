@@ -15,7 +15,7 @@ namespace StargateAPI.Business.Queries
     public class GetPersonByNameHandler : IRequestHandler<GetPersonByName, GetPersonByNameResult>
     {
         private readonly StarbaseContext _starbaseContext;
-        public GetPersonByNameHandler(StarbaseContext context, IDatabaseLoggingService loggingService)
+        public GetPersonByNameHandler(StarbaseContext context)
         {
             _starbaseContext = context;
         }
@@ -34,9 +34,8 @@ namespace StargateAPI.Business.Queries
             {
                 return result;
             }
-            else
-            {
-                var personAstronaut = await _starbaseContext.People
+
+            var personAstronaut = await _starbaseContext.People
                     .AsNoTracking()
                     .Where(p => p.Name.ToLower() == normalizedName)
                     .Select(p => new PersonAstronaut
@@ -50,9 +49,8 @@ namespace StargateAPI.Business.Queries
                     })
                     .FirstOrDefaultAsync(cancellationToken);
 
-                result.Person = personAstronaut;
-                return result;
-            }
+            result.Person = personAstronaut;
+            return result;
         }
     }
 
