@@ -368,3 +368,18 @@ FodyWeavers.xsd
 *.sqlite3
 *.db-wal
 *.db-shm
+
+# Angular / Node (Frontend only)
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/coverage/
+Frontend/.cache/
+Frontend/tmp/
+Frontend/.sass-cache/
+Frontend/.eslintcache
+Frontend/*.log
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+Frontend/pnpm-debug.log*
