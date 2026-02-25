@@ -9,12 +9,12 @@ namespace StargateAPI.Tests.QueryTests
     public class GetAstronautDutiesByNameTests
     {
         [Fact]
-        public async Task GetPersonByName_ReturnsPerson_WhenPersonExists()
+        public async Task GetAstronautDutiesByName_ReturnsPerson_WhenPersonExists()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPersonAsync(context);
+            await SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "John Doe" };
             var cancellationToken = CancellationToken.None;
@@ -32,12 +32,12 @@ namespace StargateAPI.Tests.QueryTests
         }
 
         [Fact]
-        public async Task GetPersonByName_ReturnsNullPerson_WhenPersonDoesNotExist()
+        public async Task GetAstronautDutiesByName_ReturnsNullPerson_WhenPersonDoesNotExist()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPersonAsync(context);
+            await SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "Jane Doe" };
             var cancellationToken = CancellationToken.None;
@@ -55,12 +55,12 @@ namespace StargateAPI.Tests.QueryTests
         }
 
         [Fact]
-        public async Task GetPersonByName_ReturnsPersonAndEmptyDuties_WhenPersonExistsByNoDuties()
+        public async Task GetAstronautDutiesByName_ReturnsPersonAndEmptyDuties_WhenPersonExistsByNoDuties()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPersonAsync(context);
+            await SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "Steve" };
             var cancellationToken = CancellationToken.None;
@@ -78,7 +78,7 @@ namespace StargateAPI.Tests.QueryTests
             Assert.Equal("Steve", result.Person.Name);
         }
 
-        private async Task SeedTestPersonAsync(StarbaseContext context)
+        private async Task SeedTestPeopleAsync(StarbaseContext context)
         {
             await context.AddAsync(new Person
             {
