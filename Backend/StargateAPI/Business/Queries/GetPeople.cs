@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using StargateAPI.Business.Data;
 using StargateAPI.Business.Dtos;
 using StargateAPI.Controllers;
@@ -13,21 +14,35 @@ namespace StargateAPI.Business.Queries
 
     public class GetPeopleHandler : IRequestHandler<GetPeople, GetPeopleResult>
     {
-        public readonly StarbaseContext _context;
+        public readonly StarbaseContext _starbaseContext;
         public GetPeopleHandler(StarbaseContext context)
         {
-            _context = context;
+            _starbaseContext = context;
         }
+
+        /// <summary>
+        /// Retrieves all people in the system with their current astronaut details, if assigned.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         public async Task<GetPeopleResult> Handle(GetPeople request, CancellationToken cancellationToken)
         {
             var result = new GetPeopleResult();
 
-            var query = $"SELECT a.Id as PersonId, a.Name, b.CurrentRank, b.CurrentDutyTitle, b.CareerStartDate, b.CareerEndDate FROM [Person] a LEFT JOIN [AstronautDetail] b on b.PersonId = a.Id";
+            var personAstronauts = await _starbaseContext.People
+                    .AsNoTracking()
+                    .Select(p => new PersonAstronaut
+                    {
+                        PersonId = p.Id,
+                        Name = p.Name,
+                        CurrentRank = p.AstronautDetail != null ? p.AstronautDetail.CurrentRank : null,
+                        CurrentDutyTitle = p.AstronautDetail != null ? p.AstronautDetail.CurrentDutyTitle : null,
+                        CareerStartDate = p.AstronautDetail != null ? p.AstronautDetail.CareerStartDate : null,
+                        CareerEndDate = p.AstronautDetail != null ? p.AstronautDetail.CareerEndDate : null
+                    })
+                    .ToListAsync(cancellationToken);
 
-            var people = await _context.Connection.QueryAsync<PersonAstronaut>(query);
-
-            result.People = people.ToList();
-
+            result.People = personAstronauts;
             return result;
         }
     }

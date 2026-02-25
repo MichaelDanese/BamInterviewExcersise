@@ -26,6 +26,7 @@ namespace StargateAPI.Business.Data
 
             // a person is uniquely identified by their name, so we can use that as a unique index
             // this would normally not done in a real application as names are not unique, but for the sake of this example we will assume that they are
+            // fulfills the rule "A Person is uniquely identified by their Name."
             builder.HasIndex(x => x.Name).IsUnique();
             builder.Property(x => x.Name).IsRequired();
 

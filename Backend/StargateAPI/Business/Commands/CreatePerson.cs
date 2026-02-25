@@ -18,13 +18,22 @@ namespace StargateAPI.Business.Commands
         {
             _context = context;
         }
-        public Task Process(CreatePerson request, CancellationToken cancellationToken)
+        public async Task Process(CreatePerson request, CancellationToken cancellationToken)
         {
-            var person = _context.People.AsNoTracking().FirstOrDefault(z => z.Name == request.Name);
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                throw new BadHttpRequestException("Bad Request. Name is required");
+            }
 
-            if (person is not null) throw new BadHttpRequestException("Bad Request");
+            var normalizedName = request.Name.ToLower().Trim();
+            var personExists = await _context.People.AsNoTracking()
+                .AnyAsync(z => z.Name.ToLower().Trim() == normalizedName, 
+                cancellationToken);
 
-            return Task.CompletedTask;
+            if (personExists)
+            {
+                throw new BadHttpRequestException("Bad Request. Name already exists in system");
+            }
         }
     }
 
@@ -38,21 +47,20 @@ namespace StargateAPI.Business.Commands
         }
         public async Task<CreatePersonResult> Handle(CreatePerson request, CancellationToken cancellationToken)
         {
+            var normalizedName = request.Name.Trim();
 
-                var newPerson = new Person()
-                {
-                   Name = request.Name
-                };
+            var newPerson = new Person()
+            {
+                Name = normalizedName
+            };
 
-                await _context.People.AddAsync(newPerson);
+            await _context.People.AddAsync(newPerson, cancellationToken);
 
-                await _context.SaveChangesAsync();
-
-                return new CreatePersonResult()
-                {
-                    Id = newPerson.Id
-                };
-          
+            await _context.SaveChangesAsync(cancellationToken);
+            return new CreatePersonResult()
+            {
+                Id = newPerson.Id
+            };
         }
     }
 
