@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { PersonService } from './services/person.service';
 import { AstronautService } from './services/astronaut.service';
 import { AstronautDutyDTO, PersonAstronaut } from './models';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgxSpinnerModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -17,6 +19,7 @@ export class App implements OnInit{
   private readonly personApi = inject(PersonService);
   private readonly astronautApi = inject(AstronautService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly spinner = inject(NgxSpinnerService);
 
   readonly createPersonForm = this.formBuilder.nonNullable.group({
     personName: ['', [Validators.required]]
@@ -50,8 +53,22 @@ export class App implements OnInit{
     this.errorMessage.set('');
   }
 
+  private setLoading(loading: boolean): void {
+    this.isLoading.set(loading);
+
+    if (loading) {
+      this.spinner.show('rocketSpinner');
+      return;
+    }
+
+    this.spinner.hide('rocketSpinner');
+  }
+
   loadPeople(): void {
-    this.personApi.getPeople().subscribe({
+    this.setLoading(true);
+    this.personApi.getPeople().pipe(
+      finalize(() => this.setLoading(false))
+    ).subscribe({
       next: (res) => {
         this.people.set(res.people ?? []);
       },
@@ -70,8 +87,10 @@ export class App implements OnInit{
       return;
     }
 
-    this.isLoading.set(true);
-    this.personApi.createPerson(name).subscribe({
+    this.setLoading(true);
+    this.personApi.createPerson(name).pipe(
+      finalize(() => this.setLoading(false))
+    ).subscribe({
       next: (res) => {
         this.successMessage.set(res.message || 'Person created.');
         this.createPersonForm.reset({ personName: '' });
@@ -79,9 +98,7 @@ export class App implements OnInit{
       },
       error: (err) => {
         this.errorMessage.set(err?.error?.message ?? 'Failed to create person.');
-        this.isLoading.set(false);
-      },
-      complete: () => this.isLoading.set(false)
+      }
     });
   }
 
@@ -98,22 +115,22 @@ export class App implements OnInit{
       return;
     }
 
-    this.isLoading.set(true);
+    this.setLoading(true);
     this.astronautApi.createAstronautDuty({
       name,
       rank,
       dutyTitle,
       dutyStartDate
-    }).subscribe({
+    }).pipe(
+      finalize(() => this.setLoading(false))
+    ).subscribe({
       next: (res) => {
         this.successMessage.set(res.message || 'Duty created.');
         this.createDutyForm.reset({ name: '', rank: '', dutyTitle: '', dutyStartDate: '' });
       },
       error: (err) => {
         this.errorMessage.set(err?.error?.message ?? 'Failed to create duty.');
-        this.isLoading.set(false);
-      },
-      complete: () => this.isLoading.set(false)
+      }
     });
   }
 
@@ -125,8 +142,10 @@ export class App implements OnInit{
       return;
     }
 
-    this.isLoading.set(true);
-    this.astronautApi.getAstronautDutiesByName(name).subscribe({
+    this.setLoading(true);
+    this.astronautApi.getAstronautDutiesByName(name).pipe(
+      finalize(() => this.setLoading(false))
+    ).subscribe({
       next: (res) => {
         this.selectedPerson.set(res.person);
         this.selectedDuties.set(res.astronautDuties ?? []);
@@ -134,9 +153,7 @@ export class App implements OnInit{
       },
       error: (err) => {
         this.errorMessage.set(err?.error?.message ?? 'Search failed.');
-        this.isLoading.set(false);
-      },
-      complete: () => this.isLoading.set(false)
+      }
     });
   }
 }
