@@ -22,7 +22,7 @@ namespace StargateAPI.Business.Commands
         {
             if (string.IsNullOrWhiteSpace(request.Name))
             {
-                throw new BadHttpRequestException("Bad Request. Name is required.");
+                throw new BadHttpRequestException("Bad Request. Name is required");
             }
 
             var normalizedName = request.Name.ToLower().Trim();
@@ -32,7 +32,7 @@ namespace StargateAPI.Business.Commands
 
             if (personExists)
             {
-                throw new BadHttpRequestException("Bad Request. Name already exists in system.");
+                throw new BadHttpRequestException("Bad Request. Name already exists in system");
             }
         }
     }
@@ -47,9 +47,11 @@ namespace StargateAPI.Business.Commands
         }
         public async Task<CreatePersonResult> Handle(CreatePerson request, CancellationToken cancellationToken)
         {
+            var normalizedName = request.Name.Trim();
+
             var newPerson = new Person()
             {
-                Name = request.Name
+                Name = normalizedName
             };
 
             await _context.People.AddAsync(newPerson, cancellationToken);
