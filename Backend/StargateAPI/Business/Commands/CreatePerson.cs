@@ -60,7 +60,8 @@ namespace StargateAPI.Business.Commands
             await _context.SaveChangesAsync(cancellationToken);
             return new CreatePersonResult()
             {
-                Id = newPerson.Id
+                Id = newPerson.Id,
+                Message = $"Person with the name of {newPerson.Name} created successfully"
             };
         }
     }
