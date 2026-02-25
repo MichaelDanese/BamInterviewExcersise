@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using StargateAPI.Enums;
 
 namespace StargateAPI.Business.Data
 {
@@ -21,6 +22,12 @@ namespace StargateAPI.Business.Data
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.Description).IsRequired();
             builder.HasIndex(x => x.Name);
+
+            builder.HasData(
+                new StargateLogSeverity { StargateLogSeverityId = (int)StargateLogSeverityEnum.Info, Name = "Info", Description = "Informational message" },
+                new StargateLogSeverity { StargateLogSeverityId = (int)StargateLogSeverityEnum.Warning, Name = "Warning", Description = "Warning message" },
+                new StargateLogSeverity { StargateLogSeverityId = (int)StargateLogSeverityEnum.Error, Name = "Error", Description = "Error message" }
+            );
 
         }
     }
