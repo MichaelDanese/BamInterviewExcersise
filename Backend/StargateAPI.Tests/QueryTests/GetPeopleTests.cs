@@ -1,11 +1,6 @@
 ﻿using StargateAPI.Business.Data;
 using StargateAPI.Business.Queries;
 using StargateAPI.Tests.TestHelpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StargateAPI.Tests.QueryTests
 {
