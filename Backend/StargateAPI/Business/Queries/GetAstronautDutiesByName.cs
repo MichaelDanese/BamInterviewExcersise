@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StargateAPI.Business.Data;
 using StargateAPI.Business.Dtos;
+using StargateAPI.Business.Extensions;
 using StargateAPI.Controllers;
 
 namespace StargateAPI.Business.Queries
@@ -37,7 +38,7 @@ namespace StargateAPI.Business.Queries
         public async Task<GetAstronautDutiesByNameResult> Handle(GetAstronautDutiesByName request, CancellationToken cancellationToken)
         {
             var result = new GetAstronautDutiesByNameResult();
-            var normalizedName = request?.Name?.Trim();
+            var normalizedName = request?.Name?.NormalizeNameOrTitle();
 
             if (string.IsNullOrEmpty(normalizedName))
             {

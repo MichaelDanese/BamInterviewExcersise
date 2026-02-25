@@ -2,6 +2,7 @@
 using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using StargateAPI.Business.Data;
+using StargateAPI.Business.Extensions;
 using StargateAPI.Business.Queries;
 using StargateAPI.Business.Services.Interfaces;
 using StargateAPI.Controllers;
@@ -45,8 +46,8 @@ namespace StargateAPI.Business.Commands
                 throw new BadHttpRequestException("Duty title cannot be empty");
             }
 
-            var normalizedDutyTitle = request.DutyTitle.Trim();
-            var normalizedName = request.Name.Trim().ToLower();
+            var normalizedDutyTitle = request.DutyTitle.NormalizeNameOrTitle();
+            var normalizedName = request.Name.NormalizeNameOrTitle().ToLower();
 
             var personId = await _starbaseContext.People
                 .AsNoTracking()
@@ -135,9 +136,9 @@ namespace StargateAPI.Business.Commands
         {
             CreateAstronautDutyResult result = new CreateAstronautDutyResult();
 
-            var normalizedDutyTitle = request.DutyTitle.Trim();
-            var normalizedRank = request.Rank.Trim();
-            var normalizedName = request.Name.Trim();
+            var normalizedDutyTitle = request.DutyTitle.NormalizeNameOrTitle();
+            var normalizedRank = request.Rank.NormalizeNameOrTitle();
+            var normalizedName = request.Name.NormalizeNameOrTitle();
 
             var isRetirement = normalizedDutyTitle.Equals(RetiredDutyTitle, StringComparison.OrdinalIgnoreCase);
 

@@ -2,6 +2,7 @@
 using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using StargateAPI.Business.Data;
+using StargateAPI.Business.Extensions;
 using StargateAPI.Controllers;
 
 namespace StargateAPI.Business.Commands
@@ -25,9 +26,9 @@ namespace StargateAPI.Business.Commands
                 throw new BadHttpRequestException("Bad Request. Name is required");
             }
 
-            var normalizedName = request.Name.ToLower().Trim();
+            var normalizedName = request.Name.ToLower().NormalizeNameOrTitle();
             var personExists = await _context.People.AsNoTracking()
-                .AnyAsync(z => z.Name.ToLower().Trim() == normalizedName, 
+                .AnyAsync(z => z.Name.ToLower().NormalizeNameOrTitle() == normalizedName, 
                 cancellationToken);
 
             if (personExists)
@@ -47,7 +48,7 @@ namespace StargateAPI.Business.Commands
         }
         public async Task<CreatePersonResult> Handle(CreatePerson request, CancellationToken cancellationToken)
         {
-            var normalizedName = request.Name.Trim();
+            var normalizedName = request.Name.NormalizeNameOrTitle();
 
             var newPerson = new Person()
             {

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using StargateAPI.Business.Data;
 using StargateAPI.Business.Dtos;
+using StargateAPI.Business.Extensions;
 using StargateAPI.Business.Services.Interfaces;
 using StargateAPI.Controllers;
 
@@ -28,7 +29,7 @@ namespace StargateAPI.Business.Queries
         public async Task<GetPersonByNameResult> Handle(GetPersonByName request, CancellationToken cancellationToken)
         {
             var result = new GetPersonByNameResult();
-            var normalizedName = request?.Name?.Trim().ToLower();
+            var normalizedName = request?.Name.NormalizeNameOrTitle().ToLower();
 
             if (String.IsNullOrEmpty(normalizedName))
             {
