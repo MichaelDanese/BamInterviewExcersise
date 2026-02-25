@@ -68,20 +68,41 @@ namespace StargateAPI.Business.Commands
                     cancellationToken
                 );
 
-            var hasOpenDuty = await _starbaseContext.AstronautDuties
-                .AsNoTracking()
-                .AnyAsync(ad =>
-                    ad.PersonId == personId &&
-                    ad.DutyEndDate == null,
-                    cancellationToken
-                );
-
             if (hasPreviousConflictingDuty) {
                 throw new BadHttpRequestException("Bad Request. Has conflicting duty.");
             }
 
-            if (hasOpenDuty) {
-                throw new BadHttpRequestException("Bad Request. Has an open duty.");
+            // check if this is a retirement duty
+            // if so then we should ensure that this is not an immediate retirement
+            // fulfill the rule "A Person's Career End Date is one day before the Retired Duty Start Dat" but also ensure that the person has at least one previous duty before retirement
+            var isRetirement = normalizedDutyTitle.Equals("RETIRED", StringComparison.OrdinalIgnoreCase);
+            if (isRetirement)
+            {
+                var hasPreviousDuty = await _starbaseContext.AstronautDuties
+                    .AsNoTracking()
+                    .AnyAsync(ad =>
+                        ad.PersonId == personId &&
+                        ad.DutyStartDate < request.DutyStartDate, 
+                        cancellationToken
+                    );
+
+                if (!hasPreviousDuty)
+                {
+                    throw new BadHttpRequestException("Cannot retire without previous duty.");
+                }
+
+                var retireOnStartDate = await _starbaseContext.AstronautDuties
+                    .AsNoTracking()
+                    .AnyAsync(ad =>
+                        ad.PersonId == personId &&
+                        ad.DutyStartDate.Date == request.DutyStartDate.Date, 
+                        cancellationToken
+                    );
+
+                if (retireOnStartDate)
+                {
+                    throw new BadHttpRequestException("Cannot retire on the same day career has started.");
+                }
             }
         }
     }
@@ -167,15 +188,21 @@ namespace StargateAPI.Business.Commands
                         _starbaseContext.AstronautDetails.Update(astronautDetail);
                     }
 
-                    var previousAstronautDuty = await _starbaseContext.AstronautDuties
-                        .Where(ad => ad.PersonId == person.PersonId)
+                    // close all open duties
+                    // fulfills the rule "A Person will only ever hold one current Astronaut Duty Title, Start Date, and Rank at a time." 
+                    var previousAstronautDuties = await _starbaseContext.AstronautDuties
+                        .Where(ad => ad.PersonId == person.PersonId && ad.DutyEndDate == null)
                         .OrderByDescending(ad => ad.DutyStartDate)
-                        .FirstOrDefaultAsync(cancellationToken);
+                        .ToListAsync(cancellationToken);
 
-                    if (previousAstronautDuty != null)
+                    if (previousAstronautDuties.Any())
                     {
-                        previousAstronautDuty.DutyEndDate = request.DutyStartDate.AddDays(-1).Date;
-                        _starbaseContext.AstronautDuties.Update(previousAstronautDuty);
+                        foreach (var previousAstronautDuty in previousAstronautDuties)
+                        {
+                            previousAstronautDuty.DutyEndDate = request.DutyStartDate.AddDays(-1).Date;
+                        }
+
+                        _starbaseContext.AstronautDuties.UpdateRange(previousAstronautDuties);
                     }
 
                     var newAstronautDuty = new AstronautDuty()
