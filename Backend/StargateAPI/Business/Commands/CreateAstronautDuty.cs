@@ -104,6 +104,48 @@ namespace StargateAPI.Business.Commands
             {
                 throw new BadHttpRequestException("Cannot create a duty with the same rank and title within the bounds of an existing duty.");
             }
+
+            // prevent consecutive duties with the same rank and title (check both previous and next duties)
+            var adjacentDuties = await _starbaseContext.AstronautDuties
+                .AsNoTracking()
+                .Where(ad => ad.PersonId == personId)
+                .OrderBy(ad => ad.DutyStartDate)
+                .Select(ad => new { ad.DutyStartDate, ad.Rank, ad.DutyTitle })
+                .ToListAsync(cancellationToken);
+
+            var previousDuty = adjacentDuties
+                .Where(ad => ad.DutyStartDate.Date < request.DutyStartDate.Date)
+                .OrderByDescending(ad => ad.DutyStartDate)
+                .FirstOrDefault();
+
+            var nextDuty = adjacentDuties
+                .Where(ad => ad.DutyStartDate.Date > request.DutyStartDate.Date)
+                .OrderBy(ad => ad.DutyStartDate)
+                .FirstOrDefault();
+
+            bool previousDutyIsSameRankAndTitle = previousDuty != null &&
+                previousDuty.Rank.ToLower() == normalizedRank &&
+                previousDuty.DutyTitle.ToLower() == normalizedDutyTitle;
+
+            bool nextDutyIsSameRankAndTitle = nextDuty != null &&
+                nextDuty.Rank.ToLower() == normalizedRank &&
+                nextDuty.DutyTitle.ToLower() == normalizedDutyTitle;
+
+            if (previousDutyIsSameRankAndTitle || nextDutyIsSameRankAndTitle)
+            {
+                throw new BadHttpRequestException("Cannot create consecutive duties with the same rank and title.");
+            }
+
+            // prevent retired from being the earliest duty
+            if (normalizedDutyTitle == "retired")
+            {
+                var hasEarlierDuty = adjacentDuties.Any(ad => ad.DutyStartDate.Date < request.DutyStartDate.Date);
+
+                if (!hasEarlierDuty)
+                {
+                    throw new BadHttpRequestException("Cannot create a retired duty as the earliest duty for a person.");
+                }
+            }
         }
     }
 
