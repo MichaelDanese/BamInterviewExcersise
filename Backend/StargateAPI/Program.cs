@@ -35,7 +35,10 @@ builder.Services.AddMediatR(cfg =>
 });
 
 var allowedOrigins = builder.Configuration
-    .GetSection("Cors:AllowedOrigins").Get<string[]>();
+    .GetSection("Cors:AllowedOrigins").Get<string[]>()?
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Select(origin => origin.Trim().TrimEnd('/'))
+    .ToArray();
 
 if (allowedOrigins is not null)
 {
@@ -69,7 +72,10 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AngularWebPage");
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
