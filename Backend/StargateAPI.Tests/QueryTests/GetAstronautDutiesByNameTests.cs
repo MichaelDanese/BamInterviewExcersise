@@ -19,7 +19,7 @@ namespace StargateAPI.Tests.QueryTests
             var request = new GetAstronautDutiesByName { Name = "John Doe" };
             var cancellationToken = CancellationToken.None;
 
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
             var handler = new GetAstronautDutiesByNameHandler(context, mockMediator.Object);
 
             var result = await handler.Handle(request, cancellationToken);
@@ -42,7 +42,7 @@ namespace StargateAPI.Tests.QueryTests
             var request = new GetAstronautDutiesByName { Name = "Jane Doe" };
             var cancellationToken = CancellationToken.None;
 
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
 
             var handler = new GetAstronautDutiesByNameHandler(context, mockMediator.Object);
 
@@ -65,7 +65,7 @@ namespace StargateAPI.Tests.QueryTests
             var request = new GetAstronautDutiesByName { Name = "Steve" };
             var cancellationToken = CancellationToken.None;
 
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
 
             var handler = new GetAstronautDutiesByNameHandler(context, mockMediator.Object);
 
@@ -114,21 +114,6 @@ namespace StargateAPI.Tests.QueryTests
             });
 
             await context.SaveChangesAsync();
-        }
-
-        private Mock<IMediator> SetupMediator(StarbaseContext context)
-        {
-            var mockMediator = new Mock<IMediator>();
-            var personHandler = new GetPersonByNameHandler(context);
-
-            mockMediator.Setup(m => m.Send(It.IsAny<GetPersonByName>(), It.IsAny<CancellationToken>()))
-                .Returns<GetPersonByName, CancellationToken>(async (request, cancellationToken) =>
-                {
-                    var result = await personHandler.Handle(request, cancellationToken);
-                    return result;
-                });
-
-            return mockMediator;
         }
     }
 }

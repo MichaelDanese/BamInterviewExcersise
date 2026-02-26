@@ -24,7 +24,7 @@ namespace StargateAPI.Business.Commands
 
         public async Task Process(CreatePerson request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            if (string.IsNullOrWhiteSpace(request?.Name))
             {
                 throw new BadHttpRequestException("Bad Request. Name is required");
             }

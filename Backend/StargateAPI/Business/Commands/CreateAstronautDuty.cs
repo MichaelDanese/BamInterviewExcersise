@@ -31,6 +31,11 @@ namespace StargateAPI.Business.Commands
 
         public async Task Process(CreateAstronautDuty request, CancellationToken cancellationToken)
         {
+            if (request is null)
+            {
+                throw new BadHttpRequestException("Request cannot be null");
+            }
+
             if (string.IsNullOrWhiteSpace(request.Name))
             {
                 throw new BadHttpRequestException("Person name cannot be empty");
@@ -229,7 +234,8 @@ namespace StargateAPI.Business.Commands
 
                     result = new CreateAstronautDutyResult()
                     {
-                        Id = newAstronautDuty.Id
+                        Id = newAstronautDuty.Id,
+                        Message = $"Successfully created astronaut duty for {normalizedName}: {normalizedDutyTitle} (Rank: {normalizedRank}) starting {request.DutyStartDate}"
                     };
                 }
                 catch(Exception e)

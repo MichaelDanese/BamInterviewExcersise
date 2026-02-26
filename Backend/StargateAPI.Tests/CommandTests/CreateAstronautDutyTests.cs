@@ -16,7 +16,7 @@ namespace StargateAPI.Tests.CommandTests
         public async Task CreateAstronautDuty_NoCurrentDuty_ShouldCreateDutySuccessfully()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var preprocessor = new CreateAstronautDutyPreProcessor(context);
             var request = new CreateAstronautDuty
@@ -28,7 +28,7 @@ namespace StargateAPI.Tests.CommandTests
             };
 
             await preprocessor.Process(request, CancellationToken.None);
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
             var mockLogger = new Mock<IDatabaseLoggingService>();
 
             var handler = new CreateAstronautDutyHandler(context, mockMediator.Object, mockLogger.Object);
@@ -45,7 +45,7 @@ namespace StargateAPI.Tests.CommandTests
         public async Task CreateAstronautDuty_NoCurrentDuty_ShouldCreateDutySuccessfullyAndThenThrowExceptionOnSameDayRetirement()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var preprocessor = new CreateAstronautDutyPreProcessor(context);
             var request = new CreateAstronautDuty
@@ -57,7 +57,7 @@ namespace StargateAPI.Tests.CommandTests
             };
 
             await preprocessor.Process(request, CancellationToken.None);
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
             var mockLogger = new Mock<IDatabaseLoggingService>();
 
             var handler = new CreateAstronautDutyHandler(context, mockMediator.Object, mockLogger.Object);
@@ -85,7 +85,7 @@ namespace StargateAPI.Tests.CommandTests
         public async Task CreateAstronautDuty_NoCurrentDutyRetirement_ThrowException()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var preprocessor = new CreateAstronautDutyPreProcessor(context);
             var request = new CreateAstronautDuty
@@ -105,7 +105,7 @@ namespace StargateAPI.Tests.CommandTests
         public async Task CreateAstronautDuty_ActiveDuty_ShouldCreateDutySuccessfully()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var preprocessor = new CreateAstronautDutyPreProcessor(context);
             var name = "John Doe";
@@ -118,7 +118,7 @@ namespace StargateAPI.Tests.CommandTests
             };
 
             await preprocessor.Process(request, CancellationToken.None);
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
             var mockLogger = new Mock<IDatabaseLoggingService>();
 
             var handler = new CreateAstronautDutyHandler(context, mockMediator.Object, mockLogger.Object);
@@ -145,7 +145,7 @@ namespace StargateAPI.Tests.CommandTests
         public async Task CreateAstronautDuty_Retirement_ShouldCreateDutySuccessfully()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var preprocessor = new CreateAstronautDutyPreProcessor(context);
             var name = "John Doe";
@@ -158,7 +158,7 @@ namespace StargateAPI.Tests.CommandTests
             };
 
             await preprocessor.Process(request, CancellationToken.None);
-            var mockMediator = SetupMediator(context);
+            var mockMediator = TestDbFactory.SetupMediator(context);
             var mockLogger = new Mock<IDatabaseLoggingService>();
 
             var handler = new CreateAstronautDutyHandler(context, mockMediator.Object, mockLogger.Object);
@@ -180,57 +180,17 @@ namespace StargateAPI.Tests.CommandTests
             Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, personResult.Person.CareerEndDate);
         }
 
-        private async Task SeedTestPeopleAsync(StarbaseContext context)
+        [Fact]
+        public async Task CreateAstronautDuty_NullRequest_ThrowException()
         {
-            await context.AddAsync(new Person
-            {
-                Name = "John Doe",
-                AstronautDetail = new AstronautDetail
-                {
-                    CurrentRank = "Captain",
-                    CurrentDutyTitle = "Commander",
-                    CareerStartDate = new DateTime(2020, 1, 1)
-                },
-                AstronautDuties = new List<AstronautDuty>
-                {
-                    new AstronautDuty
-                    {
-                        Rank = "Lieutenant",
-                        DutyTitle = "Pilot",
-                        DutyStartDate = new DateTime(2020, 1, 1),
-                        DutyEndDate = new DateTime(2021, 1, 1)
-                    },
-                    new AstronautDuty
-                    {
-                        Rank = "Captain",
-                        DutyTitle = "Commander",
-                        DutyStartDate = new DateTime(2021, 1, 2),
-                        DutyEndDate = null
-                    }
-                }
-            });
+            var context = TestDbFactory.CreateInMemoryDbContext();
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
-            await context.AddAsync(new Person
-            {
-                Name = "Steve"
-            });
+            var preprocessor = new CreateAstronautDutyPreProcessor(context);
 
-            await context.SaveChangesAsync();
-        }
+            await Assert.ThrowsAsync<BadHttpRequestException>(() =>
+               preprocessor.Process(null, CancellationToken.None));
 
-        private Mock<IMediator> SetupMediator(StarbaseContext context)
-        {
-            var mockMediator = new Mock<IMediator>();
-            var personHandler = new GetPersonByNameHandler(context);
-
-            mockMediator.Setup(m => m.Send(It.IsAny<GetPersonByName>(), It.IsAny<CancellationToken>()))
-                .Returns<GetPersonByName, CancellationToken>(async (request, cancellationToken) =>
-                {
-                    var result = await personHandler.Handle(request, cancellationToken);
-                    return result;
-                });
-
-            return mockMediator;
         }
     }
 }
