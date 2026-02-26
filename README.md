@@ -60,3 +60,35 @@ Examine the code, find and resolve any flaws, if any exist. Identify design patt
 1. A Person's Previous Duty End Date is set to the day before the New Astronaut Duty Start Date when a new Astronaut Duty is received for a Person.
 1. A Person is classified as 'Retired' when a Duty Title is 'RETIRED'.
 1. A Person's Career End Date is one day before the Retired Duty Start Date.
+
+## Interview Notes - Stargate API Code Review
+
+### Note 1: DTO Pattern Inconsistency
+Query handlers return EF entities directly, risking serialization issues and exposing database structure. Recommend using DTOs (like PersonAstronaut) consistently across all endpoints.
+
+### Note 2: Naming Convention Issue
+Context class named StargateContext but database is Starbase — renamed to StarbaseContext for consistency.
+
+### Note 3: SQL Injection Risk
+String interpolation in queries exposes SQL injection vulnerabilities. Use parameterized queries throughout.
+
+### Note 4: Incorrect Query Reference
+GetAstronautDutiesByName was incorrectly calling GetPersonByName — fixed to call correct handler.
+
+### Note 5: Missing Error Handling
+CreateAstronautDuty endpoint lacked try-catch block — added exception handling for consistency.
+
+### Note 6: Case-Sensitive Comparisons
+String comparisons weren't normalized — implemented .NormalizeNameOrTitle() extension for consistent matching.
+
+### Note 7: Data Integrity - Removed Denormalized Fields
+Removed CurrentDuty and CurrentRank from Person table. Future-dated duties would corrupt these values. Current duty now derived from AstronautDuty table where DutyEndDate IS NULL.
+
+### Note 8: Business Rules Enforcement
+Implemented strict duty assignment rules:
+
+- No future-dating allowed
+- One duty per day per person
+- Backdated duties adjust existing duty boundaries (end date = new start date - 1)
+- Current duty determination: DutyStartDate <= TODAY AND (DutyEndDate IS NULL OR DutyEndDate >= TODAY)
+- Retirement interpretation: Terminal duty with title 'RETIRED' — multiple retirements permitted via new assignments

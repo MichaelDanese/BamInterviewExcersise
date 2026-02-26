@@ -145,14 +145,22 @@ namespace StargateAPI.Business.Commands
             {
                 try
                 {
-                    var personResult = await _mediator.Send(new GetPersonByName { Name = normalizedName }, cancellationToken);
-                    var person = personResult.Person;
+                    var personId = await _starbaseContext.People
+                        .AsNoTracking()
+                        .Where(p => p.Name.ToLower() == normalizedName.ToLower())
+                        .Select(p => p.Id)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (personId == 0)
+                    {
+                        throw new BadHttpRequestException($"Person with name '{normalizedName}' not found.");
+                    }
 
                     var astronautDetail = await _starbaseContext.AstronautDetails
-                        .FirstOrDefaultAsync(z => z.PersonId == person.PersonId, cancellationToken);
+                        .FirstOrDefaultAsync(z => z.PersonId == personId, cancellationToken);
 
                     var nextDutyStartDate = await _starbaseContext.AstronautDuties
-                        .Where(ad => ad.PersonId == person.PersonId && ad.DutyStartDate.Date > request.DutyStartDate.Date)
+                        .Where(ad => ad.PersonId == personId && ad.DutyStartDate.Date > request.DutyStartDate.Date)
                         .OrderBy(ad => ad.DutyStartDate)
                         .Select(ad => (DateTime?)ad.DutyStartDate)
                         .FirstOrDefaultAsync(cancellationToken);
@@ -164,7 +172,7 @@ namespace StargateAPI.Business.Commands
                     {
                         astronautDetail = new AstronautDetail()
                         {
-                            PersonId = person.PersonId,
+                            PersonId = personId,
                             CareerStartDate = request.DutyStartDate.Date
                         };
 
@@ -195,7 +203,7 @@ namespace StargateAPI.Business.Commands
 
                     var previousDuty = await _starbaseContext.AstronautDuties
                         .Where(ad =>
-                            ad.PersonId == person.PersonId &&
+                            ad.PersonId == personId &&
                             ad.DutyStartDate.Date < request.DutyStartDate.Date &&
                             !ad.DutyEndDate.HasValue)
                         .SingleOrDefaultAsync(cancellationToken);
@@ -209,7 +217,7 @@ namespace StargateAPI.Business.Commands
                     // if the new duty falls in the bounds of another duty, we need to adjust the end date of that duty to be the day before the new duty start date
                     var conflictingDuties = await _starbaseContext.AstronautDuties
                         .Where(ad =>
-                            ad.PersonId == person.PersonId &&
+                            ad.PersonId == personId &&
                             ad.DutyStartDate.Date < request.DutyStartDate.Date &&
                             ad.DutyEndDate.HasValue && ad.DutyEndDate.Value.Date >= request.DutyStartDate.Date)
                         .SingleOrDefaultAsync(cancellationToken);
@@ -222,7 +230,7 @@ namespace StargateAPI.Business.Commands
 
                     var newAstronautDuty = new AstronautDuty()
                     {
-                        PersonId = person.PersonId,
+                        PersonId = personId,
                         Rank = normalizedRank,
                         DutyTitle = normalizedDutyTitle,
                         DutyStartDate = request.DutyStartDate.Date,
