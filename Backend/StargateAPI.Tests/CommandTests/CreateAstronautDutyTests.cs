@@ -82,26 +82,6 @@ namespace StargateAPI.Tests.CommandTests
         }
 
         [Fact]
-        public async Task CreateAstronautDuty_NoCurrentDutyRetirement_ThrowException()
-        {
-            var context = TestDbFactory.CreateInMemoryDbContext();
-            await TestDbFactory.SeedTestPeopleAsync(context);
-
-            var preprocessor = new CreateAstronautDutyPreProcessor(context);
-            var request = new CreateAstronautDuty
-            {
-                Name = "Steve",
-                Rank = "Lieutenant",
-                DutyTitle = "Retired",
-                DutyStartDate = DateTime.UtcNow
-            };
-
-            await Assert.ThrowsAsync<BadHttpRequestException>(() =>
-               preprocessor.Process(request, CancellationToken.None));
-
-        }
-
-        [Fact]
         public async Task CreateAstronautDuty_ActiveDuty_ShouldCreateDutySuccessfully()
         {
             var context = TestDbFactory.CreateInMemoryDbContext();

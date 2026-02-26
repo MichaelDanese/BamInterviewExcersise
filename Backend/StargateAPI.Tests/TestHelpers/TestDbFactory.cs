@@ -28,8 +28,6 @@ namespace StargateAPI.Tests.TestHelpers
                 Name = "John Doe",
                 AstronautDetail = new AstronautDetail
                 {
-                    CurrentRank = "Captain",
-                    CurrentDutyTitle = "Commander",
                     CareerStartDate = new DateTime(2020, 1, 1)
                 },
                 AstronautDuties = new List<AstronautDuty>

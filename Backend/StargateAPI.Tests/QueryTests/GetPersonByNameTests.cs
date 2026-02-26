@@ -13,7 +13,7 @@ namespace StargateAPI.Tests.QueryTests
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPersonAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var request = new GetPersonByName { Name = "John Doe" };
             var cancellationToken = CancellationToken.None;
@@ -33,7 +33,7 @@ namespace StargateAPI.Tests.QueryTests
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPersonAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var request = new GetPersonByName { Name = "Jane Doe" };
             var cancellationToken = CancellationToken.None;
@@ -44,22 +44,6 @@ namespace StargateAPI.Tests.QueryTests
 
             Assert.NotNull(result);
             Assert.Null(result.Person);
-        }
-
-        private async Task SeedTestPersonAsync(StarbaseContext context)
-        {
-            await context.AddAsync(new Person
-            {
-                Name = "John Doe",
-                AstronautDetail = new AstronautDetail
-                {
-                    CurrentRank = "Captain",
-                    CurrentDutyTitle = "Commander",
-                    CareerStartDate = new DateTime(2020, 1, 1)
-                }
-            });
-
-            await context.SaveChangesAsync();
         }
     }
 }

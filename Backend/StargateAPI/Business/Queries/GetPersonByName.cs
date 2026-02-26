@@ -36,19 +36,39 @@ namespace StargateAPI.Business.Queries
                 return result;
             }
 
-            var personAstronaut = await _starbaseContext.People
-                    .AsNoTracking()
-                    .Where(p => p.Name.ToLower() == normalizedName)
-                    .Select(p => new PersonAstronaut
-                    {
-                        PersonId = p.Id,
-                        Name = p.Name,
-                        CurrentRank = p.AstronautDetail != null ? p.AstronautDetail.CurrentRank : null,
-                        CurrentDutyTitle = p.AstronautDetail != null ? p.AstronautDetail.CurrentDutyTitle : null,
-                        CareerStartDate = p.AstronautDetail != null ? p.AstronautDetail.CareerStartDate : null,
-                        CareerEndDate = p.AstronautDetail != null ? p.AstronautDetail.CareerEndDate : null
-                    })
-                    .FirstOrDefaultAsync(cancellationToken);
+            var today = DateTime.UtcNow.Date;
+
+            var person = await _starbaseContext.People
+                .Include(p => p.AstronautDetail)
+                .AsNoTracking()
+                .Where(p => p.Name.ToLower() == normalizedName)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (person == null)
+            {
+                return result;
+            }
+
+            // first, try to find a duty where today falls within the date range
+            // if there are multiple active duties, we will take the most recent one based on DutyStartDate
+            var currentDuty = await _starbaseContext.AstronautDuties
+                .AsNoTracking()
+                .Where(ad =>
+                    ad.PersonId == person.Id &&
+                    ad.DutyStartDate.Date <= today &&
+                    (ad.DutyEndDate == null || ad.DutyEndDate.Value.Date >= today))
+                .OrderByDescending(ad => ad.DutyStartDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var personAstronaut = new PersonAstronaut
+            {
+                PersonId = person.Id,
+                Name = person.Name,
+                CurrentRank = currentDuty?.Rank,
+                CurrentDutyTitle = currentDuty?.DutyTitle,
+                CareerStartDate = person.AstronautDetail?.CareerStartDate,
+                CareerEndDate = person.AstronautDetail?.CareerEndDate
+            };
 
             result.Person = personAstronaut;
             return result;

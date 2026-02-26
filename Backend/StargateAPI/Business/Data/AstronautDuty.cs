@@ -28,6 +28,7 @@ namespace StargateAPI.Business.Data
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.HasIndex(x => new { x.PersonId, x.DutyStartDate, x.DutyEndDate });
         }
     }
 }
