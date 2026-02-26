@@ -1,7 +1,5 @@
 .container {
-	max-width: 900px;
-	margin: 0 auto;
-	padding: 1.5rem;
+	max-width: 960px;
 }
 
 .message-modal-backdrop {
@@ -61,50 +59,4 @@
 	}
 }
 
-h1 {
-	margin-bottom: 1.5rem;
-}
-
-section {
-	margin-bottom: 1.25rem;
-	padding: 1rem;
-	border: 1px solid #ddd;
-	border-radius: 8px;
-}
-
-form {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.75rem;
-}
-
-input,
-button {
-	padding: 0.5rem 0.75rem;
-	font-size: 1rem;
-}
-
-button {
-	cursor: pointer;
-}
-
-.success {
-	color: #0f7a2f;
-}
-
-.error {
-	color: #b00020;
-}
-
-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-th,
-td {
-	border: 1px solid #ddd;
-	padding: 0.5rem;
-	text-align: left;
-}
 

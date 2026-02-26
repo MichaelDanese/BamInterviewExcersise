@@ -30,72 +30,108 @@
 
 <div class="message-modal-backdrop" *ngIf="successMessage() || errorMessage()">
   <div class="message-modal" role="dialog" aria-modal="true" aria-label="Status message">
-    <h3 [class.success]="!!successMessage()" [class.error]="!!errorMessage()">
+    <h3 [class.text-success]="!!successMessage()" [class.text-danger]="!!errorMessage()">
       {{ successMessage() ? 'Success' : 'Error' }}
     </h3>
     <p>{{ successMessage() || errorMessage() }}</p>
-    <button type="button" (click)="clearMessages()">Close</button>
+    <button type="button" class="btn btn-secondary align-self-end" (click)="clearMessages()">Close</button>
   </div>
 </div>
 
-<div class="container">
-  <h1>Stargate Astronaut Management</h1>
+<div class="container py-4">
+  <h1 class="display-6 mb-4">Stargate Astronaut Management</h1>
 
-  <section>
-    <h2>Create Person</h2>
-    <form [formGroup]="createPersonForm" (ngSubmit)="onCreatePerson()">
-      <input type="text" formControlName="personName" placeholder="Person name" />
-      <button type="submit" [disabled]="isLoading()">Create Person</button>
-    </form>
+  <section class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Create Person</h2>
+      <form class="row g-2 align-items-end" [formGroup]="createPersonForm" (ngSubmit)="onCreatePerson()">
+        <div class="col-md-8 col-lg-6">
+          <label for="personName" class="form-label">Person Name</label>
+          <input id="personName" class="form-control" type="text" formControlName="personName" placeholder="Person name" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <button class="btn btn-primary w-100" type="submit" [disabled]="isLoading()">Create Person</button>
+        </div>
+      </form>
+    </div>
   </section>
 
-  <section>
-    <h2>Create Astronaut Duty</h2>
-    <form [formGroup]="createDutyForm" (ngSubmit)="onCreateDuty()">
-      <input type="text" formControlName="name" placeholder="Person name" />
-      <input type="text" formControlName="rank" placeholder="Rank" />
-      <input type="text" formControlName="dutyTitle" placeholder="Duty title" />
-      <input type="date" formControlName="dutyStartDate" />
-      <button type="submit" [disabled]="isLoading()">Create Duty</button>
-    </form>
+  <section class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Create Astronaut Duty</h2>
+      <form class="row g-3 align-items-end" [formGroup]="createDutyForm" (ngSubmit)="onCreateDuty()">
+        <div class="col-md-6 col-lg-3">
+          <label for="dutyPersonName" class="form-label">Person Name</label>
+          <input id="dutyPersonName" class="form-control" type="text" formControlName="name" placeholder="Person name" />
+        </div>
+        <div class="col-md-6 col-lg-2">
+          <label for="dutyRank" class="form-label">Rank</label>
+          <input id="dutyRank" class="form-control" type="text" formControlName="rank" placeholder="Rank" />
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <label for="dutyTitle" class="form-label">Duty Title</label>
+          <input id="dutyTitle" class="form-control" type="text" formControlName="dutyTitle" placeholder="Duty title" />
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <label for="dutyStartDate" class="form-label" title="Duty Start Date is in UTC time.">Duty Start Date</label>
+          <input id="dutyStartDate" class="form-control" type="date" formControlName="dutyStartDate" [max]="maxDutyStartDate" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <button class="btn btn-primary w-100" type="submit" [disabled]="isLoading()">Create Duty</button>
+        </div>
+      </form>
+    </div>
   </section>
 
-  <section>
-    <h2>Search Person Duties</h2>
-    <form [formGroup]="searchForm" (ngSubmit)="onSearchByName()">
-      <input type="text" formControlName="searchName" placeholder="Search by name" />
-      <button type="submit" [disabled]="isLoading()">Search</button>
-    </form>
+  <section class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Search Person Duties</h2>
+      <form class="row g-2 align-items-end" [formGroup]="searchForm" (ngSubmit)="onSearchByName()">
+        <div class="col-md-8 col-lg-6">
+          <label for="searchName" class="form-label">Search by Name</label>
+          <input id="searchName" class="form-control" type="text" formControlName="searchName" placeholder="Search by name" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <button class="btn btn-primary w-100" type="submit" [disabled]="isLoading()">Search</button>
+        </div>
+      </form>
+    </div>
   </section>
 
-  <section *ngIf="selectedPerson() as selectedPerson">
-    <h2>Person Details</h2>
-    <p><strong>Name:</strong> {{ selectedPerson.name }}</p>
-    <p><strong>Current Rank:</strong> {{ selectedPerson.currentRank || '-' }}</p>
-    <p><strong>Current Duty:</strong> {{ selectedPerson.currentDutyTitle || '-' }}</p>
-    <p><strong>Career Start:</strong> {{ selectedPerson.careerStartDate ? (selectedPerson.careerStartDate | date:'MM-dd-yyyy') : '-' }}</p>
-    <p><strong>Career End:</strong> {{ selectedPerson.careerEndDate ? (selectedPerson.careerEndDate | date:'MM-dd-yyyy') : '-' }}</p>
+  <section class="card mb-3" *ngIf="selectedPerson() as selectedPerson">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Person Details</h2>
+      <p class="mb-2"><strong>Name:</strong> {{ selectedPerson.name }}</p>
+      <p class="mb-2"><strong>Current Rank:</strong> {{ selectedPerson.currentRank || '-' }}</p>
+      <p class="mb-2"><strong>Current Duty:</strong> {{ selectedPerson.currentDutyTitle || '-' }}</p>
+      <p class="mb-2"><strong>Career Start:</strong> {{ selectedPerson.careerStartDate ? (selectedPerson.careerStartDate | date:'MM-dd-yyyy') : '-' }}</p>
+      <p class="mb-0"><strong>Career End:</strong> {{ selectedPerson.careerEndDate ? (selectedPerson.careerEndDate | date:'MM-dd-yyyy') : '-' }}</p>
+    </div>
   </section>
 
-  <section *ngIf="selectedDuties().length > 0">
-    <h2>Duty History</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Duty Title</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let duty of selectedDuties()">
-          <td>{{ duty.rank }}</td>
-          <td>{{ duty.dutyTitle }}</td>
-          <td>{{ duty.dutyStartDate | date:'MM-dd-yyyy' }}</td>
-          <td>{{ duty.dutyEndDate ? (duty.dutyEndDate | date:'MM-dd-yyyy') : '-' }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <section class="card" *ngIf="selectedDuties().length > 0">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Duty History</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered mb-0">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Duty Title</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let duty of selectedDuties()">
+              <td>{{ duty.rank }}</td>
+              <td>{{ duty.dutyTitle }}</td>
+              <td>{{ duty.dutyStartDate | date:'MM-dd-yyyy' }}</td>
+              <td>{{ duty.dutyEndDate ? (duty.dutyEndDate | date:'MM-dd-yyyy') : '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 </div>
