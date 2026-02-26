@@ -15,6 +15,7 @@ import { AstronautDutyDTO, PersonAstronaut } from './models';
 })
 export class App implements OnInit{
   protected readonly title = signal('stargate-frontend');
+  readonly maxDutyStartDate = this.getTodayDate();
 
   private readonly personApi = inject(PersonService);
   private readonly astronautApi = inject(AstronautService);
@@ -46,6 +47,15 @@ export class App implements OnInit{
 
   ngOnInit(): void {
     this.loadPeople();
+  }
+
+  private getTodayDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   clearMessages(): void {
@@ -126,6 +136,8 @@ export class App implements OnInit{
     ).subscribe({
       next: (res) => {
         this.successMessage.set(res.message || 'Duty created.');
+        this.selectedPerson.set(null);
+        this.selectedDuties.set([]);
         this.createDutyForm.reset({ name: '', rank: '', dutyTitle: '', dutyStartDate: '' });
       },
       error: (err) => {

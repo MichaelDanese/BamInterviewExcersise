@@ -49,8 +49,6 @@ namespace StargateAPI.Business.Data
                     {
                         Id = 1,
                         PersonId = 1,
-                        CurrentRank = "1LT",
-                        CurrentDutyTitle = "Commander",
                         CareerStartDate = DateTime.Now
                     }
                 );

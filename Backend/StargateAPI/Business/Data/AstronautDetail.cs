@@ -10,11 +10,6 @@ namespace StargateAPI.Business.Data
         public int Id { get; set; }
 
         public int PersonId { get; set; }
-
-        public string CurrentRank { get; set; } = string.Empty;
-
-        public string CurrentDutyTitle { get; set; } = string.Empty;
-
         public DateTime CareerStartDate { get; set; }
 
         public DateTime? CareerEndDate { get; set; }
@@ -28,8 +23,6 @@ namespace StargateAPI.Business.Data
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
-            builder.Property(x => x.CurrentRank).IsRequired();
-            builder.Property(x => x.CurrentDutyTitle).IsRequired();
             builder.Property(x => x.CareerStartDate).IsRequired();
         }
     }

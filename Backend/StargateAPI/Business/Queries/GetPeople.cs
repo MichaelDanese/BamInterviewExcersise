@@ -29,18 +29,32 @@ namespace StargateAPI.Business.Queries
         {
             var result = new GetPeopleResult();
 
+            var today = DateTime.UtcNow.Date;
+
             var personAstronauts = await _starbaseContext.People
-                    .AsNoTracking()
-                    .Select(p => new PersonAstronaut
+                .AsNoTracking()
+                .GroupJoin(
+                    _starbaseContext.AstronautDuties
+                        .Where(ad =>
+                            ad.DutyStartDate.Date <= today &&
+                            (ad.DutyEndDate == null || ad.DutyEndDate.Value.Date >= today)),
+                    person => person.Id,
+                    duty => duty.PersonId,
+                    (person, duties) => new
                     {
-                        PersonId = p.Id,
-                        Name = p.Name,
-                        CurrentRank = p.AstronautDetail != null ? p.AstronautDetail.CurrentRank : null,
-                        CurrentDutyTitle = p.AstronautDetail != null ? p.AstronautDetail.CurrentDutyTitle : null,
-                        CareerStartDate = p.AstronautDetail != null ? p.AstronautDetail.CareerStartDate : null,
-                        CareerEndDate = p.AstronautDetail != null ? p.AstronautDetail.CareerEndDate : null
+                        Person = person,
+                        CurrentDuty = duties.OrderByDescending(d => d.DutyStartDate).FirstOrDefault()
                     })
-                    .ToListAsync(cancellationToken);
+                .Select(x => new PersonAstronaut
+                {
+                    PersonId = x.Person.Id,
+                    Name = x.Person.Name,
+                    CurrentRank = x.CurrentDuty != null ? x.CurrentDuty.Rank : null,
+                    CurrentDutyTitle = x.CurrentDuty != null ? x.CurrentDuty.DutyTitle : null,
+                    CareerStartDate = x.Person.AstronautDetail != null ? x.Person.AstronautDetail.CareerStartDate : null,
+                    CareerEndDate = x.Person.AstronautDetail != null ? x.Person.AstronautDetail.CareerEndDate : null
+                })
+                .ToListAsync(cancellationToken);
 
             result.People = personAstronauts;
             return result;

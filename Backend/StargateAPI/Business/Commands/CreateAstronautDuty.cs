@@ -51,8 +51,16 @@ namespace StargateAPI.Business.Commands
                 throw new BadHttpRequestException("Duty title cannot be empty");
             }
 
-            var normalizedDutyTitle = request.DutyTitle.NormalizeNameOrTitle();
+            var normalizedDutyTitle = request.DutyTitle.NormalizeNameOrTitle().ToLower();
             var normalizedName = request.Name.NormalizeNameOrTitle().ToLower();
+            var normalizedRank = request.Rank.NormalizeNameOrTitle().ToLower();
+            var today = DateTime.UtcNow.Date;
+
+            // prevent future dating
+            if (request.DutyStartDate.Date > today)
+            {
+                throw new BadHttpRequestException("Duty start date cannot be in the future");
+            }
 
             var personId = await _starbaseContext.People
                 .AsNoTracking()
@@ -65,50 +73,36 @@ namespace StargateAPI.Business.Commands
                 throw new BadHttpRequestException($"Cannot find person with name '{request.Name}'");
             }
 
-            var hasPreviousConflictingDuty = await _starbaseContext.AstronautDuties
+            // we cannot start two duties on the same date
+            var existingDutySameStartDate = await _starbaseContext.AstronautDuties
                 .AsNoTracking()
-                .AnyAsync(ad => 
+                .AnyAsync(ad =>
                     ad.PersonId == personId &&
-                    ad.DutyTitle == normalizedDutyTitle && 
-                    ad.DutyStartDate == request.DutyStartDate, 
+                    ad.DutyStartDate.Date == request.DutyStartDate.Date,
                     cancellationToken
                 );
 
-            if (hasPreviousConflictingDuty) {
-                throw new BadHttpRequestException("Bad Request. Has conflicting duty.");
+            if (existingDutySameStartDate)
+            {
+                throw new BadHttpRequestException("Cannot start two duties on the same date for the same person.");
             }
 
-            // check if this is a retirement duty
-            // if so then we should ensure that this is not an immediate retirement
-            // fulfill the rule "A Person's Career End Date is one day before the Retired Duty Start Dat" but also ensure that the person has at least one previous duty before retirement
-            var isRetirement = normalizedDutyTitle.Equals("RETIRED", StringComparison.OrdinalIgnoreCase);
-            if (isRetirement)
+            // if the duty falls in the bounds of an existing duty we can adjust those bounds but only if the rank and title are different
+            // this cleanly handles backdating
+            var sameRankAndTitleInBounds = await _starbaseContext.AstronautDuties
+            .AsNoTracking()
+            .AnyAsync(ad =>
+                ad.PersonId == personId &&
+                ad.DutyStartDate.Date <= request.DutyStartDate.Date &&
+                ad.DutyEndDate.HasValue && ad.DutyEndDate.Value.Date >= request.DutyStartDate.Date &&
+                ad.Rank.ToLower() == normalizedRank &&
+                ad.DutyTitle.ToLower() == normalizedDutyTitle,
+                cancellationToken
+            );
+
+            if (sameRankAndTitleInBounds)
             {
-                var hasPreviousDuty = await _starbaseContext.AstronautDuties
-                    .AsNoTracking()
-                    .AnyAsync(ad =>
-                        ad.PersonId == personId &&
-                        ad.DutyStartDate < request.DutyStartDate, 
-                        cancellationToken
-                    );
-
-                if (!hasPreviousDuty)
-                {
-                    throw new BadHttpRequestException("Cannot retire without previous duty.");
-                }
-
-                var retireOnStartDate = await _starbaseContext.AstronautDuties
-                    .AsNoTracking()
-                    .AnyAsync(ad =>
-                        ad.PersonId == personId &&
-                        ad.DutyStartDate.Date == request.DutyStartDate.Date, 
-                        cancellationToken
-                    );
-
-                if (retireOnStartDate)
-                {
-                    throw new BadHttpRequestException("Cannot retire on the same day career has started.");
-                }
+                throw new BadHttpRequestException("Cannot create a duty with the same rank and title within the bounds of an existing duty.");
             }
         }
     }
@@ -152,49 +146,46 @@ namespace StargateAPI.Business.Commands
                 try
                 {
                     var personResult = await _mediator.Send(new GetPersonByName { Name = normalizedName }, cancellationToken);
-                    if (personResult?.Person is null)
-                    {
-                        throw new BadHttpRequestException($"Cannot find person with name '{normalizedName}'");
-                    }
-
                     var person = personResult.Person;
 
                     var astronautDetail = await _starbaseContext.AstronautDetails
                         .FirstOrDefaultAsync(z => z.PersonId == person.PersonId, cancellationToken);
 
+                    var nextDutyStartDate = await _starbaseContext.AstronautDuties
+                        .Where(ad => ad.PersonId == person.PersonId && ad.DutyStartDate.Date > request.DutyStartDate.Date)
+                        .OrderBy(ad => ad.DutyStartDate)
+                        .Select(ad => (DateTime?)ad.DutyStartDate)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    var isBackdated = nextDutyStartDate.HasValue;
+
                     // insert
                     if (astronautDetail is null)
                     {
-                        // a Person's Career End Date is one day before the Retired Duty Start Date.
-                        DateTime? careerEndDate = isRetirement ?
-                            request.DutyStartDate.AddDays(-1).Date :
-                            null;
-
                         astronautDetail = new AstronautDetail()
                         {
                             PersonId = person.PersonId,
-                            CurrentDutyTitle = normalizedDutyTitle,
-                            CurrentRank = normalizedRank,
-                            CareerStartDate = request.DutyStartDate.Date,
-                            CareerEndDate = careerEndDate
+                            CareerStartDate = request.DutyStartDate.Date
                         };
 
                         await _starbaseContext.AstronautDetails.AddAsync(astronautDetail, cancellationToken);
-
                     }
                     // update
                     else
                     {
-                        astronautDetail.CurrentDutyTitle = normalizedDutyTitle;
-                        astronautDetail.CurrentRank = normalizedRank;
-
                         // update career start date if this duty starts earlier
                         if (request.DutyStartDate.Date < astronautDetail.CareerStartDate)
                         {
                             astronautDetail.CareerStartDate = request.DutyStartDate.Date;
                         }
 
-                        if (isRetirement)
+                        // update if person comes out of retirement
+                        if (astronautDetail.CareerEndDate.HasValue && request.DutyStartDate.Date > astronautDetail.CareerEndDate.Value)
+                        {
+                            astronautDetail.CareerEndDate = null;
+                        }
+
+                        if (isRetirement && !isBackdated)
                         {
                             astronautDetail.CareerEndDate = request.DutyStartDate.AddDays(-1).Date;
                         }
@@ -202,21 +193,31 @@ namespace StargateAPI.Business.Commands
                         _starbaseContext.AstronautDetails.Update(astronautDetail);
                     }
 
-                    // close all open duties
-                    // fulfills the rule "A Person will only ever hold one current Astronaut Duty Title, Start Date, and Rank at a time." 
-                    var previousAstronautDuties = await _starbaseContext.AstronautDuties
-                        .Where(ad => ad.PersonId == person.PersonId && ad.DutyEndDate == null)
-                        .OrderByDescending(ad => ad.DutyStartDate)
-                        .ToListAsync(cancellationToken);
+                    var previousDuty = await _starbaseContext.AstronautDuties
+                        .Where(ad =>
+                            ad.PersonId == person.PersonId &&
+                            ad.DutyStartDate.Date < request.DutyStartDate.Date &&
+                            !ad.DutyEndDate.HasValue)
+                        .SingleOrDefaultAsync(cancellationToken);
 
-                    if (previousAstronautDuties.Any())
+                    if (previousDuty != null)
                     {
-                        foreach (var previousAstronautDuty in previousAstronautDuties)
-                        {
-                            previousAstronautDuty.DutyEndDate = request.DutyStartDate.AddDays(-1).Date;
-                        }
+                        previousDuty.DutyEndDate = request.DutyStartDate.AddDays(-1).Date;
+                        _starbaseContext.AstronautDuties.Update(previousDuty);
+                    }
 
-                        _starbaseContext.AstronautDuties.UpdateRange(previousAstronautDuties);
+                    // if the new duty falls in the bounds of another duty, we need to adjust the end date of that duty to be the day before the new duty start date
+                    var conflictingDuties = await _starbaseContext.AstronautDuties
+                        .Where(ad =>
+                            ad.PersonId == person.PersonId &&
+                            ad.DutyStartDate.Date < request.DutyStartDate.Date &&
+                            ad.DutyEndDate.HasValue && ad.DutyEndDate.Value.Date >= request.DutyStartDate.Date)
+                        .SingleOrDefaultAsync(cancellationToken);
+
+                    if (conflictingDuties != null)
+                    {
+                        conflictingDuties.DutyEndDate = request.DutyStartDate.AddDays(-1).Date;
+                        _starbaseContext.AstronautDuties.Update(conflictingDuties);
                     }
 
                     var newAstronautDuty = new AstronautDuty()
@@ -225,7 +226,7 @@ namespace StargateAPI.Business.Commands
                         Rank = normalizedRank,
                         DutyTitle = normalizedDutyTitle,
                         DutyStartDate = request.DutyStartDate.Date,
-                        DutyEndDate = null
+                        DutyEndDate = nextDutyStartDate?.AddDays(-1).Date
                     };
 
                     await _starbaseContext.AstronautDuties.AddAsync(newAstronautDuty, cancellationToken);
@@ -235,7 +236,7 @@ namespace StargateAPI.Business.Commands
                     result = new CreateAstronautDutyResult()
                     {
                         Id = newAstronautDuty.Id,
-                        Message = $"Successfully created astronaut duty for {normalizedName}: {normalizedDutyTitle} (Rank: {normalizedRank}) starting {request.DutyStartDate}"
+                        Message = $"Successfully created astronaut duty for {normalizedName}: {normalizedDutyTitle} (Rank: {normalizedRank}) starting {request.DutyStartDate:MM-dd-yyyy}"
                     };
                 }
                 catch(Exception e)

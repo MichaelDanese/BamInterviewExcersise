@@ -14,7 +14,7 @@ namespace StargateAPI.Tests.QueryTests
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "John Doe" };
             var cancellationToken = CancellationToken.None;
@@ -37,7 +37,7 @@ namespace StargateAPI.Tests.QueryTests
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "Jane Doe" };
             var cancellationToken = CancellationToken.None;
@@ -60,7 +60,7 @@ namespace StargateAPI.Tests.QueryTests
             var context = TestDbFactory.CreateInMemoryDbContext();
 
             // seed data
-            await SeedTestPeopleAsync(context);
+            await TestDbFactory.SeedTestPeopleAsync(context);
 
             var request = new GetAstronautDutiesByName { Name = "Steve" };
             var cancellationToken = CancellationToken.None;
@@ -76,44 +76,6 @@ namespace StargateAPI.Tests.QueryTests
             Assert.NotNull(result.AstronautDuties);
             Assert.Empty(result.AstronautDuties);
             Assert.Equal("Steve", result.Person.Name);
-        }
-
-        private async Task SeedTestPeopleAsync(StarbaseContext context)
-        {
-            await context.AddAsync(new Person
-            {
-                Name = "John Doe",
-                AstronautDetail = new AstronautDetail
-                {
-                    CurrentRank = "Captain",
-                    CurrentDutyTitle = "Commander",
-                    CareerStartDate = new DateTime(2020, 1, 1)
-                },
-                AstronautDuties = new List<AstronautDuty>
-                {
-                    new AstronautDuty
-                    {
-                        Rank = "Lieutenant",
-                        DutyTitle = "Pilot",
-                        DutyStartDate = new DateTime(2020, 1, 1),
-                        DutyEndDate = new DateTime(2021, 1, 1)
-                    },
-                    new AstronautDuty
-                    {
-                        Rank = "Captain",
-                        DutyTitle = "Commander",
-                        DutyStartDate = new DateTime(2021, 1, 2),
-                        DutyEndDate = null
-                    }
-                }
-            });
-
-            await context.AddAsync(new Person
-            {
-                Name = "Steve"
-            });
-
-            await context.SaveChangesAsync();
         }
     }
 }
