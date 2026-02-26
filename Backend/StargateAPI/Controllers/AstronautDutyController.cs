@@ -31,13 +31,24 @@ namespace StargateAPI.Controllers
 
                 return this.GetResponse(result);
             }
-            catch (Exception ex)
+            catch (BadHttpRequestException ex)
             {
                 await _logger.LogErrorAsync("Error in GetAstronautDutiesByName", ex.Message, ex);
 
                 return this.GetResponse(new BaseResponse()
                 {
                     Message = ex.Message,
+                    Success = false,
+                    ResponseCode = (int)HttpStatusCode.BadRequest
+                });
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error in GetAstronautDutiesByName", ex.Message, ex);
+
+                return this.GetResponse(new BaseResponse()
+                {
+                    Message = "An internal server error occurred. Please try again later.",
                     Success = false,
                     ResponseCode = (int)HttpStatusCode.InternalServerError
                 });
@@ -52,13 +63,25 @@ namespace StargateAPI.Controllers
                 var result = await _mediator.Send(request);
                 return this.GetResponse(result);
             }
-            catch(Exception ex)
+
+            catch (BadHttpRequestException ex)
             {
                 await _logger.LogErrorAsync("Error in CreateAstronautDuty", ex.Message, ex);
 
                 return this.GetResponse(new BaseResponse()
                 {
                     Message = ex.Message,
+                    Success = false,
+                    ResponseCode = (int)HttpStatusCode.BadRequest
+                });
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error in CreateAstronautDuty", ex.Message, ex);
+
+                return this.GetResponse(new BaseResponse()
+                {
+                    Message = "An internal server error occurred. Please try again later.",
                     Success = false,
                     ResponseCode = (int)HttpStatusCode.InternalServerError
                 });

@@ -32,13 +32,24 @@ namespace StargateAPI.Controllers
 
                 return this.GetResponse(result);
             }
-            catch (Exception ex)
+            catch (BadHttpRequestException ex)
             {
                 await _logger.LogErrorAsync("Error in GetPeople", ex.Message, ex);
 
                 return this.GetResponse(new BaseResponse()
                 {
                     Message = ex.Message,
+                    Success = false,
+                    ResponseCode = (int)HttpStatusCode.BadRequest
+                });
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error in GetPeople", ex.Message, ex);
+
+                return this.GetResponse(new BaseResponse()
+                {
+                    Message = "An internal server error occurred. Please try again later.",
                     Success = false,
                     ResponseCode = (int)HttpStatusCode.InternalServerError
                 });
@@ -57,13 +68,24 @@ namespace StargateAPI.Controllers
 
                 return this.GetResponse(result);
             }
-            catch (Exception ex)
+            catch (BadHttpRequestException ex)
             {
                 await _logger.LogErrorAsync("Error in GetPersonByName", ex.Message, ex);
 
                 return this.GetResponse(new BaseResponse()
                 {
                     Message = ex.Message,
+                    Success = false,
+                    ResponseCode = (int)HttpStatusCode.BadRequest
+                });
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error in GetPersonByName", ex.Message, ex);
+
+                return this.GetResponse(new BaseResponse()
+                {
+                    Message = "An internal server error occurred. Please try again later.",
                     Success = false,
                     ResponseCode = (int)HttpStatusCode.InternalServerError
                 });
@@ -82,13 +104,24 @@ namespace StargateAPI.Controllers
 
                 return this.GetResponse(result);
             }
-            catch (Exception ex)
+            catch (BadHttpRequestException ex)
             {
                 await _logger.LogErrorAsync("Error in CreatePerson", ex.Message, ex);
 
                 return this.GetResponse(new BaseResponse()
                 {
                     Message = ex.Message,
+                    Success = false,
+                    ResponseCode = (int)HttpStatusCode.BadRequest
+                });
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync("Error in CreatePerson", ex.Message, ex);
+
+                return this.GetResponse(new BaseResponse()
+                {
+                    Message = "An internal server error occurred. Please try again later.",
                     Success = false,
                     ResponseCode = (int)HttpStatusCode.InternalServerError
                 });
