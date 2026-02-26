@@ -13,7 +13,7 @@ import { AstronautDutyDTO, PersonAstronaut } from './models';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit{
+export class App {
   protected readonly title = signal('stargate-frontend');
   readonly maxDutyStartDate = this.getTodayDate();
 
@@ -37,17 +37,12 @@ export class App implements OnInit{
     searchName: ['', [Validators.required]]
   });
 
-  people = signal<PersonAstronaut[]>([]);
   selectedPerson = signal<PersonAstronaut | null>(null);
   selectedDuties = signal<AstronautDutyDTO[]>([]);
 
   isLoading = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
-
-  ngOnInit(): void {
-    this.loadPeople();
-  }
 
   private getTodayDate(): string {
     const today = new Date();
@@ -74,20 +69,6 @@ export class App implements OnInit{
     this.spinner.hide('rocketSpinner');
   }
 
-  loadPeople(): void {
-    this.setLoading(true);
-    this.personApi.getPeople().pipe(
-      finalize(() => this.setLoading(false))
-    ).subscribe({
-      next: (res) => {
-        this.people.set(res.people ?? []);
-      },
-      error: (err) => {
-        this.errorMessage.set(err?.error?.message ?? 'Failed to load people.');
-      }
-    });
-  }
-
   onCreatePerson(): void {
     this.clearMessages();
 
@@ -104,7 +85,6 @@ export class App implements OnInit{
       next: (res) => {
         this.successMessage.set(res.message || 'Person created.');
         this.createPersonForm.reset({ personName: '' });
-        this.loadPeople();
       },
       error: (err) => {
         this.errorMessage.set(err?.error?.message ?? 'Failed to create person.');
