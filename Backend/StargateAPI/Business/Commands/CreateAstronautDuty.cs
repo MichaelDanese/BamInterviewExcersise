@@ -182,10 +182,18 @@ namespace StargateAPI.Business.Commands
                     {
                         astronautDetail.CurrentDutyTitle = normalizedDutyTitle;
                         astronautDetail.CurrentRank = normalizedRank;
+
+                        // update career start date if this duty starts earlier
+                        if (request.DutyStartDate.Date < astronautDetail.CareerStartDate)
+                        {
+                            astronautDetail.CareerStartDate = request.DutyStartDate.Date;
+                        }
+
                         if (isRetirement)
                         {
                             astronautDetail.CareerEndDate = request.DutyStartDate.AddDays(-1).Date;
                         }
+
                         _starbaseContext.AstronautDetails.Update(astronautDetail);
                     }
 
